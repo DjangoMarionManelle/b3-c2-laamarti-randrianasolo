@@ -89,7 +89,7 @@ def seebookings(request):
         return render(request, 'myapp/booklist.html', locals())
     else:
         context["error"] = "Sorry no course booked"
-        return render(request, 'myapp/home.html', context)
+        return render(request, 'myapp/booklist.html', context)
 
 
 def signup(request):

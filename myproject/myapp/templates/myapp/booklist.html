@@ -1,6 +1,8 @@
 {% extends 'myapp/base.html' %}
 {% block content %}
-<h3>{{msg}}</h3>
+<div class="alert alert-warning" role="alert">
+    {{error}}
+</div>
 <h2 class="text-center m-3">List of courses</h2>
 <table class="table table-striped">
     <thead style="background-color: lightcoral ;color: white;">
@@ -38,8 +40,6 @@
     <div class="container text-center mb-5">
         <button type="submit" class="btn btn-danger ">Cancel course</button>
     </div>
-
-    {{error}}
 
 </form>
 
