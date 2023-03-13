@@ -41,6 +41,10 @@
         <button type="submit" class="btn btn-success">Book course</button>
     </div>
 
+    {% if not shcool_course_list %}
+    {{error}}
+    {% endif %}
+
 </form>
 
 

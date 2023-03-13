@@ -6,7 +6,9 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 import logging
+
 logger = logging.getLogger(__name__)
+
 
 def home(request):
     if request.user.is_authenticated:
@@ -44,23 +46,30 @@ def bookings(request):
     context = {}
     if request.method == 'POST':
         id_r = request.POST.get('school_course_id')
-        school_course = SchoolCourse.objects.get(id=id_r)
-        if school_course:
-            name_r = school_course.course_name
-            schoolname_r = school_course.school_name
-            date_r = school_course.date
-            time_r = school_course.time
-            username_r = request.user.username
-            email_r = request.user.email
-            userid_r = request.user.id
-            book = Book.objects.create(name=username_r, email=email_r, user_id=userid_r, course_name=name_r,
-                                       school_course_id=id_r, date=date_r, time=time_r, school_name=schoolname_r,
-                                       status='BOOKED')
-            print('------------book id-----------', book.id)
-            return render(request, 'myapp/bookings.html', locals())
-        else:
-            context["error"] = "Sorry there is no course available"
-            return render(request, 'myapp/findcourse.html', context)
+        if id_r == "":
+            context["error"] = "Please provide a valid course ID."
+            return render(request, 'myapp/error.html', context)
+        try:
+            school_course = SchoolCourse.objects.get(id=id_r)
+            if school_course:
+                name_r = school_course.course_name
+                schoolname_r = school_course.school_name
+                date_r = school_course.date
+                time_r = school_course.time
+                username_r = request.user.username
+                email_r = request.user.email
+                userid_r = request.user.id
+                book = Book.objects.create(name=username_r, email=email_r, user_id=userid_r, course_name=name_r,
+                                           school_course_id=id_r, date=date_r, time=time_r, school_name=schoolname_r,
+                                           status='BOOKED')
+                print('------------book id-----------', book.id)
+                return render(request, 'myapp/bookings.html', locals())
+            else:
+                context["error"] = "Sorry there is no course available"
+                return render(request, 'myapp/findcourse.html', context)
+        except SchoolCourse.DoesNotExist:
+            context["error"] = "Sorry this course does not exist"
+            return render(request, 'myapp/error.html', context)
     else:
         return render(request, 'myapp/findcourse.html')
 
@@ -70,15 +79,23 @@ def cancellings(request):
     context = {}
     if request.method == 'POST':
         id_r = request.POST.get('school_course_id')
+        if id_r == "":
+            context["error"] = "Please provide a valid course ID."
+            return render(request, 'myapp/error.html', context)
         try:
-            Book.objects.filter(id=id_r).update(status='CANCELLED')
-            return redirect(seebookings)
+            book = Book.objects.get(id=id_r)
+            if book.status == 'CANCELLED':
+                context["error"] = "This course has already been cancelled."
+                return render(request, 'myapp/error.html', context)
+            else:
+                book.status = 'CANCELLED'
+                book.save()
+                return redirect(seebookings)
         except Book.DoesNotExist:
-            context["error"] = "Sorry You have not booked that course"
+            context["error"] = "Sorry, you have not booked that course."
             return render(request, 'myapp/error.html', context)
     else:
         return render(request, 'myapp/home.html')
-
 
 @login_required(login_url='signin')
 def seebookings(request):

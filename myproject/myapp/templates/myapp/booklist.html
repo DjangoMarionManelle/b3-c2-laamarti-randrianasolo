@@ -1,18 +1,20 @@
 {% extends 'myapp/base.html' %}
 {% block content %}
+{% if not book_list %}
 <div class="alert alert-warning" role="alert">
     {{error}}
 </div>
+{% endif %}
 <h2 class="text-center m-3">List of courses</h2>
 <table class="table table-striped">
     <thead style="background-color: lightcoral ;color: white;">
-        <th>BOOKING ID</th>
-        <th>USER NAME</th>
-        <th>COURSE NAME</th>
-        <th>SCHOOL NAME</th>
-        <th>DATE</th>
-        <th>TIME</th>
-        <th>STATUS</th>
+    <th>BOOKING ID</th>
+    <th>USER NAME</th>
+    <th>COURSE NAME</th>
+    <th>SCHOOL NAME</th>
+    <th>DATE</th>
+    <th>TIME</th>
+    <th>STATUS</th>
     </thead>
 
     {% for row in book_list %}
