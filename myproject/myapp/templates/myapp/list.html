@@ -1,0 +1,44 @@
+{% extends 'myapp/base.html' %}
+{% block content %}
+<h3>{{msg}}</h3>
+<h2 class="text-center m-3">List of courses</h2>
+<table class="table table-striped" >
+    <thead style="background-color: lightcoral;color: white;">
+        <th>ID</th>
+        <th>COURSE NAME</th>
+        <th>SCHOOL NAME</th>
+        <th>ADDRESS</th>
+        <th>DATE</th>
+        <th>TIME</th>
+    </thead>
+
+    {% for row in shcool_course_list %}
+    <tr>
+        <td>{{row.id }}</td>
+        <td>{{row.course_name}}</td>
+        <td>{{row.school_name}}</td>
+        <td>{{row.address}}</td>
+        <td>{{row.date}}</td>
+        <td>{{row.time}}</td>
+    </tr>
+    {% endfor %}
+</table>
+<form action="{% url 'bookings' %}" method="post">
+    <h3 class="text-center">Choose course to book</h3>
+    {% csrf_token %}
+    <div class="col-auto text-center">
+        <label for="course-id-input" class="col-2 col-form-label text-center">COURSE ID</label>
+        <div class="col-2 container text-center">
+            <input name='school_course_id' class="form-control  text-center" type="number" id="course-id-input">
+        </div>
+    </div>
+    <br>
+    <div class="container text-center mb-5">
+        <button type="submit" class="btn btn-success">Book course</button>
+    </div>
+
+    {{error}}
+
+</form>
+
+{% endblock %}

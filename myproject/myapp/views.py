@@ -4,11 +4,21 @@ from .models import User, SchoolCourse, Book
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-
+from django.db.models import Q
+import logging
+logger = logging.getLogger(__name__)
 
 def home(request):
     if request.user.is_authenticated:
-        return render(request, 'myapp/home.html')
+        context = {}
+        username = request.user.username
+        shcool_course_list = SchoolCourse.objects.all()
+        if shcool_course_list:
+            context["username"] = username
+            return render(request, 'myapp/home.html', locals())
+        else:
+            context["error"] = "Sorry no course availiable"
+            return render(request, 'myapp/home.html')
     else:
         return render(request, 'myapp/signin.html')
 
@@ -19,7 +29,7 @@ def findcourse(request):
     if request.method == 'POST':
         course_name_r = request.POST.get('course_name')
         date_r = request.POST.get('date')
-        shcool_course_list = SchoolCourse.objects.filter(course_name=course_name_r, date=date_r)
+        shcool_course_list = SchoolCourse.objects.filter(Q(course_name=course_name_r))
         if shcool_course_list:
             return render(request, 'myapp/list.html', locals())
         else:
@@ -37,13 +47,15 @@ def bookings(request):
         school_course = SchoolCourse.objects.get(id=id_r)
         if school_course:
             name_r = school_course.course_name
+            schoolname_r = school_course.school_name
             date_r = school_course.date
             time_r = school_course.time
             username_r = request.user.username
             email_r = request.user.email
             userid_r = request.user.id
             book = Book.objects.create(name=username_r, email=email_r, user_id=userid_r, course_name=name_r,
-                                       school_course_id=id_r, date=date_r, time=time_r, status='BOOKED')
+                                       school_course_id=id_r, date=date_r, time=time_r, school_name=schoolname_r,
+                                       status='BOOKED')
             print('------------book id-----------', book.id)
             return render(request, 'myapp/bookings.html', locals())
         else:
@@ -58,7 +70,6 @@ def cancellings(request):
     context = {}
     if request.method == 'POST':
         id_r = request.POST.get('school_course_id')
-
         try:
             Book.objects.filter(id=id_r).update(status='CANCELLED')
             return redirect(seebookings)
@@ -66,19 +77,19 @@ def cancellings(request):
             context["error"] = "Sorry You have not booked that course"
             return render(request, 'myapp/error.html', context)
     else:
-        return render(request, 'myapp/findcourse.html')
+        return render(request, 'myapp/home.html')
 
 
 @login_required(login_url='signin')
-def seebookings(request,new={}):
+def seebookings(request):
     context = {}
     id_r = request.user.id
-    book_list = Book.objects.filter(id=id_r)
+    book_list = Book.objects.filter(user_id=id_r).order_by('-id')
     if book_list:
         return render(request, 'myapp/booklist.html', locals())
     else:
-        context["error"] = "Sorry no buses booked"
-        return render(request, 'myapp/findcourse.html', context)
+        context["error"] = "Sorry no course booked"
+        return render(request, 'myapp/home.html', context)
 
 
 def signup(request):
